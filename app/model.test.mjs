@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {example,validate,simulate,aclCheck,cidr} from './model.mjs';
+test('example has valid addressing and associations',()=>assert.deepEqual(validate(example()),[]));
+test('private and public example endpoints complete a round trip',()=>{for(const id of ['private','public']){const result=simulate(example(),id);assert.equal(result.at(-1).title,'Round trip allowed');assert.ok(result.every(x=>x.ok));}});
+test('lowest numbered ACL deny takes precedence',()=>{const ns=example();ns.find(n=>n.id==='acl-private').rules.push({number:50,direction:'out',cidr:'0.0.0.0/0',from:443,to:443,action:'deny'});const r=simulate(ns,'private');assert.equal(r.at(-1).ok,false);assert.match(r.at(-1).detail,/Rule 50/)});
+test('stateless return path needs inbound ephemeral port',()=>{const ns=example();ns.find(n=>n.id==='acl-private').rules=ns.find(n=>n.id==='acl-private').rules.filter(r=>r.direction==='out');const r=simulate(ns,'private');assert.equal(r.at(-1).title,'Source ACL · return inbound');assert.equal(r.at(-1).ok,false);});
+test('missing gateway attachment and EIP block traffic',()=>{for(const [id,key,value] of [['igw','attached',false],['nat','eip','']]){const ns=example();ns.find(n=>n.id===id)[key]=value;assert.equal(simulate(ns,'private').at(-1).ok,false)}});
+test('longest matching prefix is selected',()=>{const ns=example();ns.find(n=>n.id==='rt-private').routes.push({cidr:'1.1.1.1/32',target:'igw'});const r=simulate(ns,'private');assert.ok(r.some(s=>s.detail.startsWith('1.1.1.1/32')));assert.equal(r.at(-1).title,'Public IPv4 needed')});
+test('overlap and out of range addresses rejected',()=>{const ns=example();ns.find(n=>n.id==='private').cidr='10.0.1.0/24';assert.ok(validate(ns).some(e=>e.includes('overlaps')));assert.equal(cidr('300.1.1.1/24'),null)});
+test('public endpoint requires public address without NAT',()=>{const ns=example();ns.find(n=>n.id==='public').publicIp=false;assert.equal(simulate(ns,'public').at(-1).ok,false)});

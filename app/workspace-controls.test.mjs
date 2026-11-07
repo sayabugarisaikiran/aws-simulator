@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {orbitView,planeDelta,remember} from './workspace-controls.mjs';
+test('orbit supports full continuous turns and clamps tilt',()=>{assert.equal(orbitView({angle:350,tilt:35},100,0).angle,385);assert.equal(orbitView({angle:0,tilt:35},0,1000).tilt,0);assert.equal(orbitView({angle:0,tilt:35},0,-1000).tilt,70)});
+test('component drag inverts the visible transform across rotation, tilt and responsive zoom',()=>{for(const angle of [-376,-90,-16,0,30,90,180,380])for(const tilt of [0,35,70])for(const scale of [.4,.64,.8,1.2]){const a=angle*Math.PI/180,t=tilt*Math.PI/180,x=47,y=-23;const screenX=scale*(x*Math.cos(a)-y*Math.sin(a));const screenY=scale*Math.cos(t)*(x*Math.sin(a)+y*Math.cos(a));const result=planeDelta(screenX,screenY,angle,tilt,scale);assert.ok(Math.abs(result.x-x)<1e-9);assert.ok(Math.abs(result.y-y)<1e-9)}});
+test('history allows exactly three undos after four changes',()=>{let history=[];for(let i=0;i<4;i++)history=remember(history,{nodes:[i]});assert.deepEqual(history.map(x=>x.nodes[0]),[1,2,3]);const restored=[];while(history.length){restored.push(history.at(-1).nodes[0]);history=history.slice(0,-1)}assert.deepEqual(restored,[3,2,1]);});

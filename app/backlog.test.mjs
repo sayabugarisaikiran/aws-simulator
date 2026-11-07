@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {example,simulate,validate} from './model.mjs';
+import {cameraOrbit,layoutScene} from './scene-layout.mjs';
+test('bare VPC validates its own CIDR without requiring a built network',()=>assert.deepEqual(validate([{id:'vpc',type:'vpc',cidr:'10.0.0.0/16'}]),[]));
+test('unrelated unfinished services do not block selected traffic path',()=>{const nodes=example();nodes.push({id:'unfinished',type:'subnet',name:'Unfinished',cidr:''});assert.ok(validate(nodes).length);assert.equal(simulate(nodes,'private').at(-1).title,'Round trip allowed')});
+test('unspecified destination is rejected',()=>assert.equal(simulate(example(),'private','0.0.0.0').at(-1).title,'Invalid test'));
+test('ACL steps identify the subnet boundary crossed',()=>{const result=simulate(example(),'private');const checks=result.filter(s=>s.title.includes('ACL'));assert.ok(checks.length>=3);assert.ok(checks.every(s=>s.subnetId))});
+test('camera follows reversed orbit direction with bounded tilt',()=>{assert.equal(cameraOrbit({angle:0,tilt:35},100,0).angle,-35);assert.equal(cameraOrbit({angle:0,tilt:35},0,-999).tilt,5);assert.equal(cameraOrbit({angle:0,tilt:35},0,999).tilt,80)});
+test('NAT geometry is placed within its associated subnet',()=>{const positions=layoutScene(example());assert.ok(Math.abs(positions.nat.x-positions.public.x)<2);assert.equal(positions.nat.z,positions.public.z)});
