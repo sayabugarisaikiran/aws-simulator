@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {emptyDraft,loadDrafts,saveDraft} from './workspace-drafts.mjs';
+import {example} from './model.mjs';
+test('example/custom switches preserve independent edits, history and view after reload',()=>{let {drafts}=loadDrafts(null,example());const custom={...emptyDraft([{id:'student',type:'vpc',name:'Student network'}]),history:[{nodes:[]}],zoom:1.2};drafts=saveDraft(drafts,'custom',custom);const edited={...drafts.example,nodes:[...drafts.example.nodes,{id:'extra',type:'eip'}]};drafts=saveDraft(drafts,'example',edited);const restored=loadDrafts(JSON.parse(JSON.stringify({version:2,mode:'custom',drafts})),example());assert.deepEqual(restored.drafts.custom,custom);assert.deepEqual(restored.drafts.example,edited);assert.equal(restored.mode,'custom')});
+test('legacy saved custom workspace migrates without losing configuration',()=>{const ns=[{id:'old-vpc',type:'vpc',cidr:'10.0.0.0/16'}];const loaded=loadDrafts({nodes:ns,mode:'custom'},example());assert.deepEqual(loaded.drafts.custom.nodes,ns);assert.equal(loaded.drafts.example.nodes.length,10)});
+test('reference NAT and EIP sit inside upper public zone without overlapping subnet',()=>{const nodes=example();for(const id of ['nat','eip']){const n=nodes.find(n=>n.id===id);assert.ok(n.x>=85&&n.x+126<=415);assert.ok(n.y>=150&&n.y+126<=610);assert.ok(n.y+126<nodes.find(n=>n.id==='public').y)}});

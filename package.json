@@ -14,7 +14,8 @@
     "db:generate": "drizzle-kit generate",
     "engine": "cargo run --manifest-path engine/Cargo.toml",
     "test:rust": "cargo test --manifest-path engine/Cargo.toml",
-    "test:parity": "node scripts/test-rust-parity.mjs"
+    "test:parity": "node scripts/test-rust-parity.mjs",
+    "test:adversarial": "node scripts/test-vpc-adversarial.mjs && node --test app/reliability.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

@@ -1,0 +1,484 @@
+[
+  {
+    "name": "Baseline public round trip",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 443",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "0.0.0.0/0 → Internet gateway",
+        "id": "rt-public",
+        "ok": true,
+        "title": "Route lookup"
+      },
+      {
+        "detail": "Outbound request reaches the external test destination.",
+        "id": "igw",
+        "ok": true,
+        "title": "Internet gateway"
+      },
+      {
+        "detail": "8.8.8.8 returns a TCP response.",
+        "id": "internet",
+        "ok": true,
+        "title": "External destination"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 55000",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · return inbound"
+      },
+      {
+        "detail": "Request and response passed the modelled network checks.",
+        "id": "public",
+        "ok": true,
+        "title": "Round trip allowed"
+      }
+    ]
+  },
+  {
+    "name": "Empty VPC CIDR",
+    "status": "PASS",
+    "actual": [
+      "VPC needs a canonical IPv4 CIDR between /16 and /28.",
+      "Public subnet needs a /16–/28 CIDR inside the VPC.",
+      "Private subnet needs a /16–/28 CIDR inside the VPC."
+    ]
+  },
+  {
+    "name": "Invalid IPv4 octet",
+    "status": "PASS",
+    "actual": [
+      "VPC needs a canonical IPv4 CIDR between /16 and /28.",
+      "Public subnet needs a /16–/28 CIDR inside the VPC.",
+      "Private subnet needs a /16–/28 CIDR inside the VPC."
+    ]
+  },
+  {
+    "name": "Noncanonical VPC CIDR",
+    "status": "PASS",
+    "actual": [
+      "VPC needs a canonical IPv4 CIDR between /16 and /28."
+    ]
+  },
+  {
+    "name": "Subnet outside VPC",
+    "status": "PASS",
+    "actual": [
+      "Public subnet needs a /16–/28 CIDR inside the VPC."
+    ]
+  },
+  {
+    "name": "Partially overlapping subnets",
+    "status": "PASS",
+    "actual": [
+      "Private subnet overlaps another subnet."
+    ]
+  },
+  {
+    "name": "Missing route-table association",
+    "status": "PASS",
+    "actual": [
+      "Public subnet needs a route table."
+    ]
+  },
+  {
+    "name": "Missing internet route",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 443",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "No route to destination",
+        "id": "rt-public",
+        "ok": false,
+        "title": "Route lookup"
+      }
+    ]
+  },
+  {
+    "name": "Detached internet gateway",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 443",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "0.0.0.0/0 → Internet gateway",
+        "id": "rt-public",
+        "ok": true,
+        "title": "Route lookup"
+      },
+      {
+        "detail": "Attach an internet gateway and route to it.",
+        "id": "igw",
+        "ok": false,
+        "title": "Internet gateway unavailable"
+      }
+    ]
+  },
+  {
+    "name": "Missing endpoint public address",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 443",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "0.0.0.0/0 → Internet gateway",
+        "id": "rt-public",
+        "ok": true,
+        "title": "Route lookup"
+      },
+      {
+        "detail": "Enable a public IPv4 on the test endpoint, or route through NAT.",
+        "id": "public",
+        "ok": false,
+        "title": "Public IPv4 needed"
+      }
+    ]
+  },
+  {
+    "name": "Private NAT missing Elastic IP",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 443",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "0.0.0.0/0 → NAT gateway",
+        "id": "rt-private",
+        "ok": true,
+        "title": "Route lookup"
+      },
+      {
+        "detail": "Associate a public subnet and an Elastic IP.",
+        "id": "nat",
+        "ok": false,
+        "title": "NAT gateway incomplete"
+      }
+    ]
+  },
+  {
+    "name": "Lower-numbered ACL deny wins",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 50 · DENY TCP 443",
+        "id": "acl-public",
+        "ok": false,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      }
+    ]
+  },
+  {
+    "name": "Inbound 443 does not allow ephemeral return 55000",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 443",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "0.0.0.0/0 → Internet gateway",
+        "id": "rt-public",
+        "ok": true,
+        "title": "Route lookup"
+      },
+      {
+        "detail": "Outbound request reaches the external test destination.",
+        "id": "igw",
+        "ok": true,
+        "title": "Internet gateway"
+      },
+      {
+        "detail": "8.8.8.8 returns a TCP response.",
+        "id": "internet",
+        "ok": true,
+        "title": "External destination"
+      },
+      {
+        "detail": "Default * rule · DENY TCP 55000",
+        "id": "acl-public",
+        "ok": false,
+        "subnetId": "public",
+        "title": "Source ACL · return inbound"
+      }
+    ]
+  },
+  {
+    "name": "Unrelated unfinished subnet is isolated",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 443",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "0.0.0.0/0 → Internet gateway",
+        "id": "rt-public",
+        "ok": true,
+        "title": "Route lookup"
+      },
+      {
+        "detail": "Outbound request reaches the external test destination.",
+        "id": "igw",
+        "ok": true,
+        "title": "Internet gateway"
+      },
+      {
+        "detail": "8.8.8.8 returns a TCP response.",
+        "id": "internet",
+        "ok": true,
+        "title": "External destination"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 55000",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · return inbound"
+      },
+      {
+        "detail": "Request and response passed the modelled network checks.",
+        "id": "public",
+        "ok": true,
+        "title": "Round trip allowed"
+      }
+    ]
+  },
+  {
+    "name": "Deleted associated igw",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public routes: choose an existing route target.",
+        "id": "",
+        "ok": false,
+        "title": "Configuration incomplete"
+      }
+    ]
+  },
+  {
+    "name": "Deleted associated rt-public",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet needs a route table.",
+        "id": "",
+        "ok": false,
+        "title": "Configuration incomplete"
+      }
+    ]
+  },
+  {
+    "name": "Deleted associated acl-public",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet needs a Network ACL.",
+        "id": "",
+        "ok": false,
+        "title": "Configuration incomplete"
+      }
+    ]
+  },
+  {
+    "name": "No custom ACL uses default ACL",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Implicit default network ACL · ALLOW (no custom ACL associated)",
+        "id": "public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "0.0.0.0/0 → Internet gateway",
+        "id": "rt-public",
+        "ok": true,
+        "title": "Route lookup"
+      },
+      {
+        "detail": "Outbound request reaches the external test destination.",
+        "id": "igw",
+        "ok": true,
+        "title": "Internet gateway"
+      },
+      {
+        "detail": "8.8.8.8 returns a TCP response.",
+        "id": "internet",
+        "ok": true,
+        "title": "External destination"
+      },
+      {
+        "detail": "Implicit default network ACL · ALLOW (no custom ACL associated)",
+        "id": "public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · return inbound"
+      },
+      {
+        "detail": "Request and response passed the modelled network checks.",
+        "id": "public",
+        "ok": true,
+        "title": "Round trip allowed"
+      }
+    ]
+  },
+  {
+    "name": "Port 22 blocked independently of allowed HTTPS",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:443 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 443",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      },
+      {
+        "detail": "0.0.0.0/0 → Internet gateway",
+        "id": "rt-public",
+        "ok": true,
+        "title": "Route lookup"
+      },
+      {
+        "detail": "Outbound request reaches the external test destination.",
+        "id": "igw",
+        "ok": true,
+        "title": "Internet gateway"
+      },
+      {
+        "detail": "8.8.8.8 returns a TCP response.",
+        "id": "internet",
+        "ok": true,
+        "title": "External destination"
+      },
+      {
+        "detail": "Rule 100 · ALLOW TCP 55000",
+        "id": "acl-public",
+        "ok": true,
+        "subnetId": "public",
+        "title": "Source ACL · return inbound"
+      },
+      {
+        "detail": "Request and response passed the modelled network checks.",
+        "id": "public",
+        "ok": true,
+        "title": "Round trip allowed"
+      }
+    ]
+  },
+  {
+    "name": "Same ACL blocks port 22",
+    "status": "PASS",
+    "actual": [
+      {
+        "detail": "Public subnet → 8.8.8.8:22 · TCP",
+        "id": "public",
+        "ok": true,
+        "title": "Test endpoint"
+      },
+      {
+        "detail": "Rule 50 · DENY TCP 22",
+        "id": "acl-public",
+        "ok": false,
+        "subnetId": "public",
+        "title": "Source ACL · outbound"
+      }
+    ]
+  }
+]

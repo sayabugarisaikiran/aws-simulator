@@ -35,3 +35,8 @@ Never claim a check was run when only a historical result was read. Do not mark
 an issue verified solely because the implementation was changed.
 If a turn is only collecting a ticket or making a decision, record it without
 implementing unrelated changes. This is the user's explicit ongoing preference.
+
+- VPC-stage subnet settings must not ask for workload public-IP configuration.
+  Use Rust's assess action for explicit route/NACL probe results, and state that
+  actual workload access is not assessed until EC2/network interfaces are added.
+  Never silently persist a probe's assumed public IP into the user's subnet.

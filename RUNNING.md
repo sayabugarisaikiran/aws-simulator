@@ -38,7 +38,7 @@ npm run dev
 ## Checks
 
 ```sh
-node --test app/model.test.mjs app/workspace-controls.test.mjs app/backlog.test.mjs
+node --test app/model.test.mjs app/workspace-controls.test.mjs app/backlog.test.mjs app/workspace-drafts.test.mjs
 npx tsc --noEmit
 cargo test --manifest-path engine/Cargo.toml
 cargo build --manifest-path engine/Cargo.toml
@@ -70,3 +70,45 @@ operation use `npm run engine` (requires cargo on PATH). Health endpoint:
 http://127.0.0.1:5180/health. The native executable also accepts JSON lines on
 stdin with --stdio, used by parity tests. This is a local development setup;
 production hosting and desktop packaging require additional integration.
+
+Example network and My workspace now keep separate browser-saved drafts. Use
+Actions → Restore example layout to apply the latest reference; use Actions →
+Clear my workspace only
+when you intend to empty your custom draft (undo is available).
+
+Additional explicit Rust corner-case checks (build engine first):
+
+```sh
+node scripts/test-vpc-corner-cases.mjs
+```
+
+Results are printed to stdout and written to the OS temporary directory as
+`vpc-corner-results.json`. Recorded QA: docs/testing/VPC_TEST_REPORT_2026-11-08.md.
+
+The UI's assess action performs subnet-only route/NACL checks and reports
+workload access as not assessed. Its synthetic IGW probe assumes public IPv4 for
+a future workload without assigning it. The legacy simulate action still models
+explicit endpoint publicIp for compatibility and historical parity tests. Rust
+changes require rebuilding/restarting the engine; frontend hot reload alone does
+not update a running Rust binary.
+
+## Adversarial regression checks and recovery
+```sh
+cargo build --locked --manifest-path engine/Cargo.toml
+npm run test:adversarial
+```
+
+If the Rust process exits after startup, the development UI stays up. Run
+`npm run engine` in another terminal, then click **Retry engine** in the
+workspace. The browser bounds individual engine calls to ten seconds.
+If a save pauses, **Export my edits** preserves both current drafts. **Load
+saved version** replaces the tab's working copy with the saved drafts.
+Use **Retry save** after resolving a storage quota problem.
+
+The local root URL opens the Service Library. Select **VPC** to resume the last
+active draft, or use **Example network** or **My workspace** to open that draft
+directly. The VPC editor is also available at `/vpc`.
+
+Use the selector in a subnet's settings to assign AZ A or B. Existing drafts
+without an assignment display **AZ unassigned**. **Actions → Restore example
+layout** loads the updated example with a same-AZ NAT path.
